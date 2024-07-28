@@ -6,11 +6,13 @@ time : 2024-06-03
 desc :
 
 前端 WSConnection.js文件：
-function sendCustomMsg()方法中，发送消息的形式从一次性发送AB数据变为分别发送AB
-const dataA = { type: "clientMsg", message: msg1, time: timeA, channel: "A" }
+`function sendCustomMsg()`方法中，发送消息的形式从一次性发送AB数据变为分别发送AB
+```js
+const dataA = { type: "clientMsg", message: msg1, time: timeA, channel: "A" }`
 const dataB = { type: "clientMsg", message: msg2, time: timeB, channel: "B" }
 sendWsMsg(dataA)
 sendWsMsg(dataB)
+```
 
 后端 webSocketNode.js文件：
 修改了当收到的消息type为 case "clientMsg": 的逻辑
@@ -18,7 +20,7 @@ sendWsMsg(dataB)
 
 2.本来会一次发送两个clear命令分别清除AB当前队列, 现在会根据消息里的data.channel来分别发送清除指令, 同时 AB通道的发信计时器独立管理
 
-3.修改了function delaySendMsg(clientId, client, target, sendData, totalSends, timeSpace, channel)
+3.修改了`function delaySendMsg(clientId, client, target, sendData, totalSends, timeSpace, channel)`
 
 此方法本来是建立一个计时器 一次发送两个通道的数据.
 现在是根据data.channel分别创建AB各自的计时器，只有收到对应通道的覆盖消息时才会清除计时器重新开始发信
@@ -54,7 +56,7 @@ SOCKET控制功能，是DG-LAB APP通过Socket服务连接到外部第三方控�
 #### 总则
 
 1. 所有的消息全部都是json格式
-2. json格式: {"type":"xxx","clientId":"xxx","targetId":"xxx","message":"xxx"}
+2. json格式:` {"type":"xxx","clientId":"xxx","targetId":"xxx","message":"xxx"}`
 3. type指令: 
    1. heartbeat -> 心跳包数据
    2. bind -> ID关系绑定
@@ -72,17 +74,17 @@ SOCKET控制功能，是DG-LAB APP通过Socket服务连接到外部第三方控�
 
 1. SOCKET通道与终端绑定：终端或APP连接SOCKET服务后，生成唯一ID，并与终端或APP的websocket对象绑定存储在Map中，向终端或APP返回ID
    
-   SOCKET向终端或APP返回的数据: {"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"","message":"targetId"}
+   SOCKET向终端或APP返回的数据: `{"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"","message":"targetId"}`
    
    终端或APP收到 type = bind，message = targetID时，表明为SOCKET服务返回的clientId为当前终端或APP的ID，本地保存。
 2. 两边终端的关系绑定: DG-LAB APP将两边终端的ID发送给SOCKET服务后，服务将两个ID绑定存储在Map中
    
-   APP向上发送的ID数据: {"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"DGLAB"}
+   APP向上发送的ID数据: `{"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"DGLAB"}`
    
    SOCKET服务收到 type = bind，message = DGLAB，且clientId，targetId不为空时，会将clientId(第三方终端ID)和targetId(APP ID)进行绑定。
 3. 绑定结果由SOCKET服务下发绑定关系的两个ID对应的终端或APP
    
-   SOCKET下发的结果数据: {"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"200"}
+   SOCKET下发的结果数据: `{"type":"bind","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"200"}`
    
    终端或APP收到 type = bind，message = 200(或其他指定数据，详细请见错误码)时，执行对应UI逻辑
 
@@ -90,7 +92,7 @@ SOCKET控制功能，是DG-LAB APP通过Socket服务连接到外部第三方控�
    
 APP中的通道强度或强度上限变化时，会向上同步当前最新的通道强度和强度上限。
 
-APP向上发送强度数据: {"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-x+x+x+x"}
+APP向上发送强度数据: `{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-x+x+x+x"}`
 
 SOCKET根据对应的ID将json转发给第三方终端，终端收到 type = msg，message = strength-x+x+x+x 的数据时，更新UI(更新最新的设备通道强度和强度上限)
    
@@ -100,7 +102,7 @@ SOCKET根据对应的ID将json转发给第三方终端，终端收到 type = msg
 
 举例：
 
-数据：{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-11+7+100+35"}
+数据：`{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-11+7+100+35"}`
 
 解释：strength-11+7+100+35 表示：当前设备A通道强度=11，B通道强度=7，A通道强度上限=100，B通道强度上限=35
 
@@ -108,7 +110,7 @@ SOCKET根据对应的ID将json转发给第三方终端，终端收到 type = msg
 
 第三方终端要修改设备通道强度时，发送指定的json指令。
 
-终端向下发送强度操作数据: {"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-x+x+x"}
+终端向下发送强度操作数据: `{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"strength-x+x+x"}`
 
 SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，message = strength-x+x+x 的数据时，执行指定强度变化操作
    
@@ -131,7 +133,7 @@ SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，messag
 
 第三方终端要下发通道波形数据时，发送指定的json指令
 
-终端向下发送波形数据: {"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"pulse-x:[\"xxxxxxxxxxxxxxxx\",\"xxxxxxxxxxxxxxxx\",......,\"xxxxxxxxxxxxxxxx\"]"}
+终端向下发送波形数据: `{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"pulse-x:[\"xxxxxxxxxxxxxxxx\",\"xxxxxxxxxxxxxxxx\",......,\"xxxxxxxxxxxxxxxx\"]"}`
 
 SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，message = pulse-x:[] 的数据时，执行波形输出操作
 
@@ -139,7 +141,7 @@ SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，messag
 1. pulse-通道:[波形数据,波形数据,......,波形数据]
 2. 通道: A - A通道；B - B通道
 3. 数据[波形数据,波形数据,......,波形数据]: 数组最大长度为100，若超出范围则APP会丢弃全部数据
-4. 波形数据必须是8字节的HEX(16进制)形式。波形数据详情请参考 [郊狼情趣脉冲主机V3的蓝牙协议](image/README_V3.md)
+4. 波形数据必须是8字节的HEX(16进制)形式。波形数据详情请参考 [郊狼情趣脉冲主机V3的蓝牙协议](../coyote/v3/README_V3.md)
 
 * Tips 每条波形数据代表了100ms的数据，所以若每次发送的数据有10条，那么就是1s的数据，由于网络有一定延时，若要保证波形输出的连续性，建议波形数据的发送间隔略微小于波形数据的时间长度(< 1s)
 * Tips 数组最大长度为100,也就是最多放置10s的数据，另外APP中的波形队列最大长度为500，即为50s的数据，若后接收到的数据无法全部放入波形队列，多余的部分会丢弃。所以谨慎考虑您的数据长度和数据发送间隔
@@ -150,7 +152,7 @@ APP中的波形执行是基于波形队列，遵循先进先出的原则，并�
 
 当波形队列中还有尚未执行完的波形数据时，第三方终端希望立刻执行新的波形数据，则需要先将对应通道的波形队列执行清空操作后，再发送波形数据，即可实现立刻执行新的波形数据的需求。
 
-终端向下发送清空波形队列数据: {"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"clear-x"}
+终端向下发送清空波形队列数据: `{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"clear-x"}`
 
 SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，message = clear-x 的数据时，执行指定通道波形队列清空操作
 
@@ -164,7 +166,7 @@ SOCKET服务根据对应的ID将json转发给APP，APP收到 type = msg，messag
 
 APP中有多个不同形状的图标按钮，点击可以上发当前按下按钮的指令，第三方终端可以拟定不同形状图标代表的感受状态。
 
-APP向上发送强度数据: {"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"feedback-x"}
+APP向上发送强度数据: `{"type":"msg","clientId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","targetId":"xxxx-xxxxxxxxx-xxxxx-xxxxx-xx","message":"feedback-x"}`
 
 SOCKET根据对应的ID将json转发给第三方终端，终端收到 type = msg，message = feedback-x 的数据时，更新UI(显示APP 用户的反馈)
 
@@ -192,11 +194,11 @@ SOCKET根据对应的ID将json转发给第三方终端，终端收到 type = msg
 
    targetId: APP ID
 
-   A通道强度减5 : { type : 1,strength: 5,message : 'set channel',channel:1,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }
+   A通道强度减5 : `{ type : 1,strength: 5,message : 'set channel',channel:1,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }`
 
-   B通道强度加1 : { type : 2,strength: 1,message : 'set channel',channel:2,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }
+   B通道强度加1 : `{ type : 2,strength: 1,message : 'set channel',channel:2,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }`
 
-   B通道强度变0 : { type : 3,strength: 0,message : 'set channel',channel:2,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }
+   B通道强度变0 : `{ type : 3,strength: 0,message : 'set channel',channel:2,clientId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx,targetId:xxxx-xxxxxxxxx-xxxxx-xxxxx-xx }`
 
 2. 波形数据:
    
